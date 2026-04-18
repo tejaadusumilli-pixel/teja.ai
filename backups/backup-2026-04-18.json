@@ -1,0 +1,128 @@
+{
+  "timestamp": "2026-04-18T10:12:10.800Z",
+  "version": "1.0",
+  "conversations": [
+    {
+      "id": "mo3ywku0pe051kteqjd",
+      "title": "hi",
+      "messages": [
+        {
+          "id": "mo3z283xc068rnd4if8",
+          "role": "user",
+          "content": "hi",
+          "timestamp": 1776494675085
+        },
+        {
+          "id": "mo3z2840f24a74w601b",
+          "role": "assistant",
+          "content": "Hello! How can I assist you today?",
+          "timestamp": 1776494675088
+        },
+        {
+          "id": "mo3z2w88doutld3lh2m",
+          "role": "user",
+          "content": "what are recent movies in telugu release?",
+          "timestamp": 1776494706344
+        },
+        {
+          "id": "mo3z2w8adhjpni43h4t",
+          "role": "assistant",
+          "content": "Here are some recent Telugu movies that have been released:\n\n1. Krack\n2. Alludu Adhurs\n3. Red\n4. Master\n5. Zombie Reddy\n6. Naandhi\n7. Uppena\n8. Jathi Ratnalu\n9. Chaavu Kaburu Challaga\n10. Rang De\n\nThese are just a few examples, there are many more Telugu movies that have been released recently.",
+          "timestamp": 1776494706346
+        },
+        {
+          "id": "mo3z3hiwgbd8tegnc04",
+          "role": "user",
+          "content": "what are recent movies in telugu release?",
+          "timestamp": 1776494733944
+        },
+        {
+          "id": "mo3z3hiy6yz8d5dnpfr",
+          "role": "assistant",
+          "content": "Here are some recent Telugu movies that have been released:\n\n1. Krack\n2. Alludu Adhurs\n3. Red\n4. Master\n5. Zombie Reddy\n6. Naandhi\n7. Uppena\n8. Jathi Ratnalu\n9. Chaavu Kaburu Challaga\n10. Rang De\n\nThese are just a few examples, there are many more Telugu movies that have been released recently.",
+          "timestamp": 1776494733946
+        },
+        {
+          "id": "mo3z400392tn81bh0q6",
+          "role": "user",
+          "content": "what are recent movies in telugu release?",
+          "timestamp": 1776494757891
+        },
+        {
+          "id": "mo3z48cgkrjhkywh7sr",
+          "role": "user",
+          "content": "what are recent movies in telugu release?",
+          "timestamp": 1776494768704
+        },
+        {
+          "id": "mo3z48ciamcq9844bw",
+          "role": "assistant",
+          "content": "I apologize, it is difficult to provide a comprehensive list of recent Telugu movies without more specific context. The release of movies can change rapidly, and it may be difficult to keep up with the latest releases. \n\nHowever, you can easily get the latest information on recent Telugu movies by checking popular movie websites, streaming platforms, or social media platforms. Some of the popular social media platforms where you can find information are Twitter, Instagram, and YouTube.",
+          "timestamp": 1776494768706
+        },
+        {
+          "id": "mo3z4i6mxbhpruvg3i",
+          "role": "user",
+          "content": "what are recent movies in telugu release?",
+          "timestamp": 1776494781454
+        },
+        {
+          "id": "mo3z4yanxokzgez1jvt",
+          "role": "user",
+          "content": "salesforce updates",
+          "timestamp": 1776494802335
+        },
+        {
+          "id": "mo43k2b7q5d36ryfl4b",
+          "role": "user",
+          "content": "salesforce",
+          "timestamp": 1776502225843
+        },
+        {
+          "id": "mo43kbth9hf7ypm6hvd",
+          "role": "user",
+          "content": "salesforce updates",
+          "timestamp": 1776502238165
+        },
+        {
+          "id": "mo43koduku6mjuq1co",
+          "role": "user",
+          "content": "salesforce",
+          "timestamp": 1776502254450
+        },
+        {
+          "id": "mo43kodvy8ptv6xpq3m",
+          "role": "assistant",
+          "content": "Here are some recent Telugu movie releases:\n\nRecent Telugu Movies:\n1. Waltair Veerayya\n2. Veera Simha Reddy\n3. Karthikeya 2\n4. Brahmastra\n5. Sita Ramam\n6. Liger\n7. Radhe Shyam\n8. Bheemla Nayak\n9. RRR\n10. Major\n\nSalesforce Updates:\n1. Einstein GPT\n2. Slack GPT integration\n3. Flow Orchestrator\n4. Dynamic Forms\n5. DevOps Center\n6. Tableau CRM updates\n7. MuleSoft Automation\n8. Customer 360 enhancements\n9. Service Cloud updates\n10. Marketing Cloud improvements\n\nWould you like more details about any of these movies or Salesforce updates?",
+          "timestamp": 1776502254451
+        },
+        {
+          "id": "mo43l3lqdd9a9o2ahd8",
+          "role": "user",
+          "content": "salesforce updates",
+          "timestamp": 1776502274174
+        },
+        {
+          "id": "mo43l3lsw3ij5i1ntz",
+          "role": "assistant",
+          "content": "Here are the recent Salesforce updates:\n\nSalesforce Platform Updates:\n1. Einstein GPT\n- AI-powered generative technology\n- Integrated across Sales, Service, Marketing clouds\n\n2. Slack GPT Integration\n- Generative AI capabilities in Slack\n- Enhanced workplace collaboration\n\n3. Flow Orchestrator\n- Advanced workflow automation\n- Complex process management\n\n4. Customer 360 Enhancements\n- Unified customer data platform\n- Improved customer experience\n\n5. Service Cloud Updates\n- AI-powered service capabilities\n- Intelligent case routing\n\n6. Sales Cloud Improvements\n- AI-driven sales insights\n- Predictive lead scoring\n\n7. Marketing Cloud Innovations\n- Personalized marketing automation\n- Advanced customer segmentation\n\n8. MuleSoft Automation\n- Enhanced API integration\n- Simplified connectivity\n\n9. Dynamic Forms\n- Flexible page layouts\n- Improved user experience\n\n10. DevOps Center\n- Streamlined development processes\n- Enhanced deployment capabilities\n\nThese updates focus on AI integration, automation, and improved user experiences across Salesforce platforms.\n\nWould you like more detailed information about any specific update?",
+          "timestamp": 1776502274176
+        },
+        {
+          "id": "mo43oopvzbdocj3pss",
+          "role": "user",
+          "content": "salesforce interview questions",
+          "timestamp": 1776502441507
+        },
+        {
+          "id": "mo43oopw9v2ns7gdib7",
+          "role": "assistant",
+          "content": "Here are some common Salesforce interview questions that you may encounter:\n\n1. What is Salesforce and what are its key features?\n2. What is the difference between a custom object and a standard object in Salesforce?\n3. Describe the Salesforce data model.\n4. What is a workflow rule in Salesforce?\n5. How do you handle security in Salesforce?\n6. Explain the difference between a role and a profile in Salesforce.\n7. What is a trigger in Salesforce and how is it used?\n8. How do you handle governor limits in Salesforce?\n9. What is a junction object in Salesforce?\n10. How do you create reports and dashboards in Salesforce?\n\nThese are just a few examples of the types of questions you may be asked in a Salesforce interview. It's important to be familiar with Salesforce fundamentals, best practices, and have hands-on experience with the platform to successfully answer these questions.",
+          "timestamp": 1776502441508
+        }
+      ],
+      "createdAt": 1776494411640,
+      "updatedAt": 1776502444106
+    }
+  ]
+}
