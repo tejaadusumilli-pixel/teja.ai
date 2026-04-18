@@ -134,12 +134,33 @@
             </div>
 
             <div class="sidebar-footer">
-                <div class="user-info" id="userInfo">
+                <div class="user-info" id="userInfo" style="cursor:pointer" title="View profile">
                     <div class="user-avatar" id="userAvatar">?</div>
                     <span class="sidebar-label user-name" id="userName">Loading…</span>
                 </div>
                 <button class="icon-btn sidebar-logout-btn sidebar-label" id="logoutBtn" title="Sign out">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </button>
+            </div>
+
+            <!-- Profile Popup -->
+            <div class="profile-popup" id="profilePopup">
+                <div class="profile-popup-avatar" id="profilePopupAvatar">?</div>
+                <div class="profile-popup-name" id="profilePopupName">—</div>
+                <div class="profile-popup-email" id="profilePopupEmail">—</div>
+                <div class="profile-popup-divider"></div>
+                <div class="profile-popup-row">
+                    <span class="profile-popup-label">API Key</span>
+                    <span class="profile-popup-value" id="profilePopupKey">—</span>
+                </div>
+                <div class="profile-popup-row">
+                    <span class="profile-popup-label">Provider</span>
+                    <span class="profile-popup-value">OpenRouter</span>
+                </div>
+                <div class="profile-popup-divider"></div>
+                <button class="profile-popup-logout" id="profilePopupLogout">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Sign out
                 </button>
             </div>
         </aside>
@@ -446,8 +467,16 @@
                 }
                 const name = user.displayName || user.email.split('@')[0];
                 window._tejaUserName = name;
+                window._tejaUserEmail = user.email;
                 document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
                 document.getElementById('userName').textContent = name;
+
+                // Populate profile popup
+                document.getElementById('profilePopupAvatar').textContent = name.charAt(0).toUpperCase();
+                document.getElementById('profilePopupName').textContent = name;
+                document.getElementById('profilePopupEmail').textContent = user.email;
+                const savedKey = localStorage.getItem('teja_ai_api_key') || '';
+                document.getElementById('profilePopupKey').textContent = savedKey ? savedKey.slice(0,8) + '••••••••' : 'Not set';
 
                 // Personalized greeting on welcome screen
                 const hour = new Date().getHours();
@@ -478,6 +507,19 @@
                 await signOut(auth);
                 window.location.href = 'login.html';
             });
+
+            // Profile popup toggle
+            const popup = document.getElementById('profilePopup');
+            document.getElementById('userInfo').addEventListener('click', (e) => {
+                e.stopPropagation();
+                popup.classList.toggle('visible');
+            });
+            document.getElementById('profilePopupLogout').addEventListener('click', async () => {
+                await signOut(auth);
+                window.location.href = 'login.html';
+            });
+            // Close popup when clicking outside
+            document.addEventListener('click', () => popup.classList.remove('visible'));
         }
     </script>
 </body>
