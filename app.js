@@ -136,7 +136,7 @@ class TejaAI {
         if (!message || this.isProcessing) return;
 
         if (!this.api.getApiKey()) {
-            alert('Please set your OpenRouter API key in settings first.');
+            showToast('Please set your OpenRouter API key in settings first.', 'error');
             this.openSettings();
             return;
         }
@@ -737,7 +737,7 @@ class TejaAI {
     openProjectDetail(id) {
         const proj = this._getProjects().find(p => p.id === id);
         if (!proj) return;
-        alert(`Project: ${proj.name}\n${proj.desc || 'No description.'}`);
+        showToast(`${proj.name}: ${proj.desc || 'No description.'}`, 'info');
     }
 
     createProjectFromSidebar() {
@@ -843,6 +843,23 @@ class TejaAI {
             this.streamingToggle.checked = settings.streaming;
         }
     }
+}
+
+// Toast notification
+function showToast(message, type = 'info') {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;';
+        document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    const bg = type === 'error' ? '#e05c5c' : type === 'success' ? '#4caf7d' : '#555';
+    toast.style.cssText = `background:${bg};color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,0.3);max-width:280px;animation:toastIn 0.2s ease;`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
 // Initialize app when DOM is ready

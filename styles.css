@@ -67,11 +67,25 @@ body {
     padding: 16px 14px 10px;
 }
 
-.sidebar-brand {
-    font-size: 20px;
+.sidebar-brand-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.sidebar-logo-icon {
+    flex-shrink: 0;
+    color: var(--accent-color);
+}
+
+.sidebar-brand-text {
+    font-size: 17px;
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: -0.3px;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .sidebar-toggle-btn {
@@ -188,7 +202,7 @@ body {
     width: 0;
 }
 
-.sidebar.collapsed .sidebar-brand {
+.sidebar.collapsed .sidebar-brand-text {
     display: none;
 }
 
@@ -517,59 +531,62 @@ body {
 /* Profile Popup */
 .profile-popup {
     display: none;
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 8px;
-    right: 8px;
-    background: var(--bg-tertiary);
+    position: fixed;
+    bottom: 70px;
+    left: 12px;
+    width: 260px;
+    background: var(--bg-secondary);
     border: 1px solid var(--border-color);
-    border-radius: 14px;
-    padding: 20px 16px 14px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    z-index: 200;
-    animation: popupIn 0.15s ease;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    z-index: 1000;
 }
-.profile-popup.visible { display: block; }
+.profile-popup.visible { display: block; animation: popupIn 0.15s ease; }
 
 @keyframes popupIn {
-    from { opacity: 0; transform: translateY(6px); }
+    from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
+.profile-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
 .profile-popup-avatar {
-    width: 52px;
-    height: 52px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     background: var(--accent-color);
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
+    font-size: 18px;
     font-weight: 700;
-    margin: 0 auto 10px;
+    flex-shrink: 0;
 }
 
 .profile-popup-name {
-    text-align: center;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 3px;
+    margin-bottom: 2px;
 }
 
 .profile-popup-email {
-    text-align: center;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-secondary);
-    margin-bottom: 12px;
     word-break: break-all;
 }
 
 .profile-popup-divider {
     height: 1px;
     background: var(--border-color);
-    margin: 10px 0;
+    margin: 12px 0;
 }
 
 .profile-popup-row {
@@ -577,18 +594,19 @@ body {
     justify-content: space-between;
     align-items: center;
     font-size: 12px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
 
 .profile-popup-label {
     color: var(--text-secondary);
+    font-weight: 500;
 }
 
 .profile-popup-value {
     color: var(--text-primary);
     font-family: monospace;
     font-size: 11px;
-    max-width: 120px;
+    max-width: 140px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -597,10 +615,10 @@ body {
 .profile-popup-logout {
     width: 100%;
     margin-top: 4px;
-    padding: 8px;
+    padding: 9px;
     background: rgba(224,92,92,0.1);
-    border: 1px solid rgba(224,92,92,0.25);
-    border-radius: 8px;
+    border: 1px solid rgba(224,92,92,0.2);
+    border-radius: 10px;
     color: #e05c5c;
     font-size: 13px;
     font-weight: 500;
@@ -612,7 +630,7 @@ body {
     gap: 6px;
     transition: background 0.15s;
 }
-.profile-popup-logout:hover { background: rgba(224,92,92,0.2); }
+.profile-popup-logout:hover { background: rgba(224,92,92,0.22); }
 
 .user-info {
     display: flex;
