@@ -4,7 +4,6 @@ class TejaAI {
     constructor() {
         this.openrouterAPI = new OpenRouterAPI();
         this.geminiAPI = new GeminiAPI();
-        this.huggingfaceAPI = new HuggingFaceAPI();
         this.currentProvider = Storage.get(CONFIG.STORAGE_KEYS.PROVIDER) || CONFIG.DEFAULT_PROVIDER;
         this.api = this._apiForProvider(this.currentProvider);
         this.conversations = new ConversationManager();
@@ -51,13 +50,11 @@ class TejaAI {
 
     _apiForProvider(provider) {
         if (provider === 'gemini') return this.geminiAPI;
-        if (provider === 'huggingface') return this.huggingfaceAPI;
         return this.openrouterAPI;
     }
 
     _modelsForProvider(provider) {
         if (provider === 'gemini') return CONFIG.GEMINI_MODELS;
-        if (provider === 'huggingface') return CONFIG.HUGGINGFACE_MODELS;
         return CONFIG.MODELS;
     }
 
@@ -93,8 +90,6 @@ class TejaAI {
     _showApiKeyModal(provider) {
         if (provider === 'gemini') {
             document.getElementById('geminiKeyOverlay').classList.add('visible');
-        } else if (provider === 'huggingface') {
-            document.getElementById('hfKeyOverlay').classList.add('visible');
         }
     }
 
@@ -125,16 +120,6 @@ class TejaAI {
             this.geminiAPI.setApiKey(key);
             if (window._tejaFirestoreSetGeminiKey) window._tejaFirestoreSetGeminiKey(key);
             showToast('Gemini key saved!', 'success');
-        });
-
-        document.getElementById('saveHFKeyBtn')?.addEventListener('click', () => {
-            const hfInput = document.getElementById('hfApiKeyInput');
-            const key = hfInput?.value.trim();
-            if (!key) return showToast('Please enter a Hugging Face token.', 'error');
-            if (!key.startsWith('hf_')) return showToast('HF tokens start with hf_…', 'error');
-            this.huggingfaceAPI.setApiKey(key);
-            if (window._tejaFirestoreSetHFKey) window._tejaFirestoreSetHFKey(key);
-            showToast('Hugging Face token saved!', 'success');
         });
 
         this.newChatBtn.addEventListener('click', () => this.createNewChat());
@@ -193,29 +178,6 @@ class TejaAI {
             geminiOverlay.classList.remove('visible');
             geminiInput.value = '';
             geminiError.textContent = '';
-        });
-
-        // Hugging Face key modal
-        const hfOverlay = document.getElementById('hfKeyOverlay');
-        const hfInput = document.getElementById('hfKeyInput');
-        const hfError = document.getElementById('hfKeyError');
-
-        document.getElementById('hfKeySave')?.addEventListener('click', () => {
-            const key = hfInput.value.trim();
-            if (!key) { hfError.textContent = 'Please enter your HF token.'; return; }
-            if (!key.startsWith('hf_')) { hfError.textContent = 'HF tokens start with hf_…'; return; }
-            this.huggingfaceAPI.setApiKey(key);
-            if (window._tejaFirestoreSetHFKey) window._tejaFirestoreSetHFKey(key);
-            hfOverlay.classList.remove('visible');
-            hfInput.value = '';
-            hfError.textContent = '';
-            this.switchProvider('huggingface');
-        });
-
-        document.getElementById('hfKeyCancel')?.addEventListener('click', () => {
-            hfOverlay.classList.remove('visible');
-            hfInput.value = '';
-            hfError.textContent = '';
         });
 
         // Sync inline model selector → settings model selector
