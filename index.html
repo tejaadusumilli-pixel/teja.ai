@@ -146,6 +146,23 @@
 
         </aside>
 
+        <!-- Gemini API Key Modal -->
+        <div class="apikey-modal-overlay" id="geminiKeyOverlay">
+            <div class="apikey-modal-card">
+                <div class="apikey-modal-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                </div>
+                <h3 class="apikey-modal-title">Google Gemini API Key</h3>
+                <p class="apikey-modal-sub">Get a free key at <strong>aistudio.google.com</strong></p>
+                <input type="password" id="geminiKeyInput" class="apikey-modal-input" placeholder="AIza…" autocomplete="off">
+                <div id="geminiKeyError" class="apikey-modal-error"></div>
+                <div class="apikey-modal-actions">
+                    <button class="apikey-modal-cancel" id="geminiKeyCancel">Cancel</button>
+                    <button class="apikey-modal-save" id="geminiKeySave">Save & Switch</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Profile Popup (outside sidebar to avoid overflow:hidden clipping) -->
         <div class="profile-popup" id="profilePopup">
             <div class="profile-popup-header">
@@ -211,6 +228,10 @@
                     </button>
                     <textarea id="messageInput" placeholder="How can I help you today?" rows="1" maxlength="10000"></textarea>
                     <div class="input-right-controls">
+                        <select id="providerSelect" title="Select provider">
+                            <option value="openrouter">OpenRouter</option>
+                            <option value="gemini">Gemini</option>
+                        </select>
                         <select id="modelSelectInline" title="Select model"></select>
                         <button class="send-btn" id="sendBtn" disabled>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -396,33 +417,26 @@
             </div>
             <div class="modal-body">
                 <div class="setting-group">
-                    <label for="apiKeyInput">OpenRouter API Key</label>
-                    <input type="password" id="apiKeyInput" placeholder="sk-or-v1-..." autocomplete="off">
-                    <small>Stored locally — never sent to our servers. Get a key at openrouter.ai</small>
+                    <label>API Keys</label>
+                    <div class="api-keys-section">
+                        <div class="api-key-row">
+                            <span class="api-key-provider-label">OpenRouter</span>
+                            <input type="password" id="apiKeyInput" placeholder="sk-or-v1-…" autocomplete="off">
+                            <button class="api-key-save-btn" id="saveOpenRouterKeyBtn">Save</button>
+                        </div>
+                        <small>Get a free key at <strong>openrouter.ai/keys</strong></small>
+                        <div class="api-key-row" style="margin-top:10px">
+                            <span class="api-key-provider-label">Gemini</span>
+                            <input type="password" id="geminiApiKeyInput" placeholder="AIza…" autocomplete="off">
+                            <button class="api-key-save-btn" id="saveGeminiKeyBtn">Save</button>
+                        </div>
+                        <small>Get a free key at <strong>aistudio.google.com</strong></small>
+                    </div>
                 </div>
 
                 <div class="setting-group">
                     <label for="modelSelect">Model</label>
-                    <select id="modelSelect">
-                        <optgroup label="Anthropic">
-                            <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Recommended)</option>
-                            <option value="anthropic/claude-3.5-haiku">Claude 3.5 Haiku (Fast)</option>
-                            <option value="anthropic/claude-3-opus">Claude 3 Opus (Most Capable)</option>
-                        </optgroup>
-                        <optgroup label="OpenAI">
-                            <option value="openai/gpt-4o">GPT-4o</option>
-                            <option value="openai/gpt-4o-mini">GPT-4o Mini (Cheap)</option>
-                            <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                        </optgroup>
-                        <optgroup label="Google">
-                            <option value="google/gemini-flash-1.5">Gemini Flash 1.5</option>
-                            <option value="google/gemini-pro-1.5">Gemini Pro 1.5</option>
-                        </optgroup>
-                        <optgroup label="Meta">
-                            <option value="meta-llama/llama-3.1-8b-instruct">Llama 3.1 8B (Cheapest)</option>
-                            <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70B</option>
-                        </optgroup>
-                    </select>
+                    <select id="modelSelect"></select>
                 </div>
 
                 <div class="setting-group">
@@ -491,17 +505,28 @@
                 if (greetEl) greetEl.textContent = `${timeGreet}, ${name}!`;
 
                 // Load API key from Firestore and sync to the running app
+                // Helpers to save keys to Firestore
+                window._tejaFirestoreSetKey = async (key) => {
+                    try { await setDoc(doc(db, 'users', user.uid), { apiKey: key }, { merge: true }); } catch {}
+                };
+                window._tejaFirestoreSetGeminiKey = async (geminiKey) => {
+                    try { await setDoc(doc(db, 'users', user.uid), { geminiApiKey: geminiKey }, { merge: true }); } catch {}
+                };
+
                 try {
                     const snap = await getDoc(doc(db, 'users', user.uid));
                     if (snap.exists() && snap.data().apiKey) {
                         const key = snap.data().apiKey;
                         localStorage.setItem('teja_ai_api_key', key);
-                        // Push key into the running app instance
-                        if (window.app && window.app.api) {
-                            window.app.api.setApiKey(key);
+                        if (window.app && window.app.openrouterAPI) window.app.openrouterAPI.setApiKey(key);
+
+                        // Load Gemini key if saved
+                        if (snap.data().geminiApiKey) {
+                            const gKey = snap.data().geminiApiKey;
+                            localStorage.setItem('teja_ai_gemini_key', gKey);
+                            if (window.app && window.app.geminiAPI) window.app.geminiAPI.setApiKey(gKey);
                         }
                     } else {
-                        // No key saved — send user back to login to enter one
                         window.location.href = 'login.html';
                     }
                 } catch {

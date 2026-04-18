@@ -2,7 +2,10 @@
 
 class TejaAI {
     constructor() {
-        this.api = new OpenRouterAPI();
+        this.openrouterAPI = new OpenRouterAPI();
+        this.geminiAPI = new GeminiAPI();
+        this.currentProvider = Storage.get(CONFIG.STORAGE_KEYS.PROVIDER) || CONFIG.DEFAULT_PROVIDER;
+        this.api = this.currentProvider === 'gemini' ? this.geminiAPI : this.openrouterAPI;
         this.conversations = new ConversationManager();
         this.isProcessing = false;
 
@@ -29,6 +32,7 @@ class TejaAI {
         this.apiKeyInput = document.getElementById('apiKeyInput');
         this.modelSelect = document.getElementById('modelSelect');
         this.modelSelectInline = document.getElementById('modelSelectInline');
+        this.providerSelect = document.getElementById('providerSelect');
         this.themeSelect = document.getElementById('themeSelect');
         this.streamingToggle = document.getElementById('streamingToggle');
         this.saveSettingsBtn = document.getElementById('saveSettingsBtn');
@@ -44,16 +48,32 @@ class TejaAI {
         this.searchBtn = document.getElementById('searchBtn');
     }
 
-    populateModelSelectors() {
-        // Populate the inline model selector from CONFIG.MODELS
+    populateModelSelectors(provider) {
+        provider = provider || this.currentProvider;
+        const models = provider === 'gemini' ? CONFIG.GEMINI_MODELS : CONFIG.MODELS;
         this.modelSelectInline.innerHTML = '';
-        Object.entries(CONFIG.MODELS).forEach(([id, info]) => {
+        Object.entries(models).forEach(([id, info]) => {
             const opt = document.createElement('option');
             opt.value = id;
             opt.textContent = info.name;
             this.modelSelectInline.appendChild(opt);
         });
-        this.modelSelectInline.value = CONFIG.DEFAULT_MODEL;
+        this.modelSelectInline.value = 'auto';
+        if (this.providerSelect) this.providerSelect.value = provider;
+    }
+
+    switchProvider(provider) {
+        if (provider === 'gemini' && !this.geminiAPI.getApiKey()) {
+            document.getElementById('geminiKeyOverlay').classList.add('visible');
+            this.providerSelect.value = this.currentProvider;
+            return;
+        }
+        this.currentProvider = provider;
+        Storage.set(CONFIG.STORAGE_KEYS.PROVIDER, provider);
+        this.api = provider === 'gemini' ? this.geminiAPI : this.openrouterAPI;
+        this.populateModelSelectors(provider);
+        this.api.setModel('auto');
+        showToast(`Switched to ${CONFIG.PROVIDERS[provider].name}`, 'success');
     }
 
     attachEventListeners() {
@@ -64,6 +84,26 @@ class TejaAI {
         this.settingsBtn.addEventListener('click', () => this.openCustomizePage());
         this.closeSettingsBtn.addEventListener('click', () => this.closeSettings());
         this.saveSettingsBtn.addEventListener('click', () => this.saveSettings());
+
+        // Save individual API keys from settings
+        document.getElementById('saveOpenRouterKeyBtn')?.addEventListener('click', () => {
+            const key = this.apiKeyInput.value.trim();
+            if (!key) return showToast('Please enter an OpenRouter key.', 'error');
+            if (!key.startsWith('sk-or-')) return showToast('OpenRouter keys start with sk-or-', 'error');
+            this.openrouterAPI.setApiKey(key);
+            if (window._tejaFirestoreSetKey) window._tejaFirestoreSetKey(key);
+            showToast('OpenRouter key saved!', 'success');
+        });
+
+        document.getElementById('saveGeminiKeyBtn')?.addEventListener('click', () => {
+            const geminiInput = document.getElementById('geminiApiKeyInput');
+            const key = geminiInput?.value.trim();
+            if (!key) return showToast('Please enter a Gemini key.', 'error');
+            if (!key.startsWith('AIza')) return showToast('Gemini keys start with AIza…', 'error');
+            this.geminiAPI.setApiKey(key);
+            if (window._tejaFirestoreSetGeminiKey) window._tejaFirestoreSetGeminiKey(key);
+            showToast('Gemini key saved!', 'success');
+        });
 
         this.newChatBtn.addEventListener('click', () => this.createNewChat());
 
@@ -91,6 +131,37 @@ class TejaAI {
         document.getElementById('cardConnectors').addEventListener('click', () => this.switchCustomizeView('connectors'));
         document.getElementById('cardSkills').addEventListener('click', () => this.switchCustomizeView('skills'));
         document.getElementById('cardSettings').addEventListener('click', () => { this.closeCustomizePage(); this.openSettings(); });
+
+        // Provider switcher
+        if (this.providerSelect) {
+            this.providerSelect.addEventListener('change', () => {
+                this.switchProvider(this.providerSelect.value);
+            });
+        }
+
+        // Gemini key modal
+        const geminiOverlay = document.getElementById('geminiKeyOverlay');
+        const geminiInput = document.getElementById('geminiKeyInput');
+        const geminiError = document.getElementById('geminiKeyError');
+
+        document.getElementById('geminiKeySave')?.addEventListener('click', () => {
+            const key = geminiInput.value.trim();
+            if (!key) { geminiError.textContent = 'Please enter your API key.'; return; }
+            if (!key.startsWith('AIza')) { geminiError.textContent = 'Gemini keys start with AIza…'; return; }
+            this.geminiAPI.setApiKey(key);
+            // Save to Firebase if user is logged in
+            if (window._tejaFirestoreSetGeminiKey) window._tejaFirestoreSetGeminiKey(key);
+            geminiOverlay.classList.remove('visible');
+            geminiInput.value = '';
+            geminiError.textContent = '';
+            this.switchProvider('gemini');
+        });
+
+        document.getElementById('geminiKeyCancel')?.addEventListener('click', () => {
+            geminiOverlay.classList.remove('visible');
+            geminiInput.value = '';
+            geminiError.textContent = '';
+        });
 
         // Sync inline model selector → settings model selector
         this.modelSelectInline.addEventListener('change', () => {
@@ -159,7 +230,7 @@ class TejaAI {
         // Resolve auto model before sending
         let resolvedModel = this.api.model;
         if (resolvedModel === 'auto') {
-            resolvedModel = autoSelectModel(message);
+            resolvedModel = autoSelectModel(message, this.currentProvider);
             this.api.setModel(resolvedModel);
             // Show which model was auto-selected in the inline selector temporarily
             if (this.modelSelectInline) this.modelSelectInline.title = `Auto selected: ${CONFIG.MODELS[resolvedModel]?.name || resolvedModel}`;
@@ -547,7 +618,24 @@ class TejaAI {
 
     openSettings() {
         this.settingsModal.classList.add('active');
-        this.apiKeyInput.value = this.api.getApiKey() || '';
+        // Fill current keys
+        this.apiKeyInput.value = this.openrouterAPI.getApiKey() || '';
+        const geminiInput = document.getElementById('geminiApiKeyInput');
+        if (geminiInput) geminiInput.value = this.geminiAPI.getApiKey() || '';
+        // Populate settings model select based on current provider
+        this._populateSettingsModelSelect();
+    }
+
+    _populateSettingsModelSelect() {
+        const models = this.currentProvider === 'gemini' ? CONFIG.GEMINI_MODELS : CONFIG.MODELS;
+        this.modelSelect.innerHTML = '';
+        Object.entries(models).forEach(([id, info]) => {
+            const opt = document.createElement('option');
+            opt.value = id;
+            opt.textContent = info.name;
+            this.modelSelect.appendChild(opt);
+        });
+        this.modelSelect.value = this.api.model || 'auto';
     }
 
     closeSettings() {
@@ -555,23 +643,19 @@ class TejaAI {
     }
 
     saveSettings() {
-        const apiKey = this.apiKeyInput.value.trim();
         const model = this.modelSelect.value;
         const theme = this.themeSelect.value;
-
-        if (apiKey) this.api.setApiKey(apiKey);
 
         this.api.setModel(model);
         this.modelSelectInline.value = model;
         Theme.apply(theme);
 
         Storage.set(CONFIG.STORAGE_KEYS.SETTINGS, {
-            model,
-            theme,
-            streaming: this.streamingToggle.checked
+            model, theme, streaming: this.streamingToggle.checked
         });
 
         this.closeSettings();
+        showToast('Settings saved', 'success');
     }
 
     saveCurrentSettings() {

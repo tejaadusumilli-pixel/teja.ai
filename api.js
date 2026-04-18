@@ -142,6 +142,71 @@ class OpenRouterAPI {
     }
 }
 
+// Google Gemini API Integration
+class GeminiAPI {
+    constructor() {
+        this.apiKey = Storage.get(CONFIG.STORAGE_KEYS.GEMINI_KEY);
+        this.model = 'gemini-2.0-flash';
+    }
+
+    setApiKey(key) {
+        this.apiKey = key;
+        Storage.set(CONFIG.STORAGE_KEYS.GEMINI_KEY, key);
+    }
+
+    getApiKey() { return this.apiKey; }
+    setModel(model) { this.model = model; }
+
+    _convertMessages(messages) {
+        const sys = messages.find(m => m.role === 'system');
+        const contents = messages
+            .filter(m => m.role !== 'system')
+            .map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
+        return { contents, systemInstruction: sys ? { parts: [{ text: sys.content }] } : undefined };
+    }
+
+    async sendMessage(messages, options = {}) {
+        if (!this.apiKey) throw new Error('Gemini API key not set. Please add it in settings.');
+        const { stream = false, temperature = 0.7, maxTokens = 4096, onChunk = null } = options;
+        const { contents, systemInstruction } = this._convertMessages(messages);
+        const body = { contents, generationConfig: { temperature, maxOutputTokens: maxTokens } };
+        if (systemInstruction) body.systemInstruction = systemInstruction;
+
+        const model = this.model === 'auto' ? 'gemini-2.0-flash' : this.model;
+        const action = stream ? 'streamGenerateContent' : 'generateContent';
+        const url = `${CONFIG.GEMINI_API_URL}/${model}:${action}?key=${this.apiKey}${stream ? '&alt=sse' : ''}`;
+
+        const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error?.message || `Gemini error ${response.status}`);
+        }
+
+        if (stream && onChunk) {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let full = '';
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const lines = decoder.decode(value, { stream: true }).split('\n');
+                for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+                    try {
+                        const data = JSON.parse(line.slice(6));
+                        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                        if (text) { full += text; onChunk(text, full); }
+                    } catch {}
+                }
+            }
+            return { content: full, model };
+        } else {
+            const data = await response.json();
+            return { content: data.candidates?.[0]?.content?.parts?.[0]?.text || '', model };
+        }
+    }
+}
+
 // Conversation Manager
 class ConversationManager {
     constructor() {

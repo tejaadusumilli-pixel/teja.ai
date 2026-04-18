@@ -1,12 +1,20 @@
 // Configuration for Teja AI
 
 const CONFIG = {
-    // OpenRouter API Configuration
+    // Provider API URLs
     OPENROUTER_API_URL: 'https://openrouter.ai/api/v1/chat/completions',
+    GEMINI_API_URL: 'https://generativelanguage.googleapis.com/v1beta/models',
 
     // Your site information
     SITE_URL: 'https://teja.ai',
     SITE_NAME: 'Teja AI',
+
+    // Providers
+    PROVIDERS: {
+        openrouter: { name: 'OpenRouter', key: 'teja_ai_api_key' },
+        gemini:     { name: 'Google Gemini', key: 'teja_ai_gemini_key' }
+    },
+    DEFAULT_PROVIDER: 'openrouter',
 
     // Default settings
     DEFAULT_MODEL: 'auto',
@@ -198,9 +206,21 @@ const CONFIG = {
         pricing: { prompt: 0, completion: 0 }
     }
 },
+    // Gemini models
+    GEMINI_MODELS: {
+        'auto': { name: 'Auto (Smart Select)', provider: 'Teja AI', contextWindow: 0, pricing: { prompt: 0, completion: 0 } },
+        'gemini-2.0-flash': { name: 'Gemini 2.0 Flash', provider: 'Google', contextWindow: 1048576, pricing: { prompt: 0, completion: 0 } },
+        'gemini-1.5-flash': { name: 'Gemini 1.5 Flash', provider: 'Google', contextWindow: 1048576, pricing: { prompt: 0, completion: 0 } },
+        'gemini-1.5-flash-8b': { name: 'Gemini 1.5 Flash 8B', provider: 'Google', contextWindow: 1048576, pricing: { prompt: 0, completion: 0 } },
+        'gemini-1.5-pro': { name: 'Gemini 1.5 Pro', provider: 'Google', contextWindow: 2097152, pricing: { prompt: 0, completion: 0 } },
+        'gemini-1.0-pro': { name: 'Gemini 1.0 Pro', provider: 'Google', contextWindow: 32768, pricing: { prompt: 0, completion: 0 } }
+    },
+
     // Local storage keys
     STORAGE_KEYS: {
         API_KEY: 'teja_ai_api_key',
+        GEMINI_KEY: 'teja_ai_gemini_key',
+        PROVIDER: 'teja_ai_provider',
         CONVERSATIONS: 'teja_ai_conversations',
         CURRENT_CHAT: 'teja_ai_current_chat',
         SETTINGS: 'teja_ai_settings',
@@ -268,16 +288,18 @@ const Theme = {
 // Initialize theme
 Theme.apply(Theme.get());
 
-// Auto model selection — picks the best free model based on message content
-function autoSelectModel(message) {
+// Auto model selection — picks best model based on message content and provider
+function autoSelectModel(message, provider = 'openrouter') {
     const text = message.toLowerCase();
-
     const isCode = /\b(code|function|bug|error|debug|script|program|class|api|sql|html|css|javascript|python|java|c\+\+|typescript|json|regex|algorithm|array|loop|variable|compile|import|export|async|await)\b/.test(text);
     const isComplex = text.length > 300 || /\b(explain|analyze|compare|summarize|essay|detailed|research|philosophy|math|calculate|proof|strategy|architecture)\b/.test(text);
     const isSimple = text.length < 80 && !isCode && !isComplex;
 
+    if (provider === 'gemini') {
+        if (isComplex) return 'gemini-1.5-pro';
+        return 'gemini-2.0-flash';
+    }
     if (isCode) return 'qwen/qwen3-coder:free';
     if (isSimple) return 'meta-llama/llama-3.2-3b-instruct:free';
-    if (isComplex) return 'meta-llama/llama-3.3-70b-instruct:free';
     return 'meta-llama/llama-3.3-70b-instruct:free';
 }
