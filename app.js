@@ -8,6 +8,8 @@ class TejaAI {
         this.api = this._apiForProvider(this.currentProvider);
         this.conversations = new ConversationManager();
         this.isProcessing = false;
+        this.githubBackup = new GitHubBackup();
+        this.autoBackupEnabled = false;
 
         this.initializeElements();
         this.populateModelSelectors();
@@ -101,6 +103,11 @@ class TejaAI {
         this.settingsBtn.addEventListener('click', () => this.openCustomizePage());
         this.closeSettingsBtn.addEventListener('click', () => this.closeSettings());
         this.saveSettingsBtn.addEventListener('click', () => this.saveSettings());
+
+        document.getElementById('testGithubBtn')?.addEventListener('click', () => this.testGithubConnection());
+        document.getElementById('backupNowBtn')?.addEventListener('click', () => this.backupNow());
+        document.getElementById('viewBackupsBtn')?.addEventListener('click', () => this.openBackupModal());
+        document.getElementById('closeBackupBtn')?.addEventListener('click', () => this.closeBackupModal());
 
         // Save individual API keys from settings
         document.getElementById('saveOpenRouterKeyBtn')?.addEventListener('click', () => {
@@ -280,6 +287,9 @@ class TejaAI {
             }
 
             this.renderChatHistory();
+            if (this.autoBackupEnabled && this.githubBackup.isConfigured()) {
+                this.githubBackup.backup(this.conversations.getAllConversations()).catch(() => {});
+            }
         } catch (error) {
             console.error('Send message error:', error);
             this.renderMessage('assistant', `Error: ${error.message}`);
@@ -673,8 +683,14 @@ class TejaAI {
         this.modelSelectInline.value = model;
         Theme.apply(theme);
 
+        const githubToken = document.getElementById('githubTokenInput')?.value.trim() || '';
+        const githubRepo = document.getElementById('githubRepoInput')?.value.trim() || '';
+        const autoBackup = document.getElementById('autoBackupToggle')?.checked || false;
+        if (githubToken && githubRepo) this.githubBackup.setCredentials(githubToken, githubRepo);
+        this.autoBackupEnabled = autoBackup;
+
         Storage.set(CONFIG.STORAGE_KEYS.SETTINGS, {
-            model, theme, streaming: this.streamingToggle.checked
+            model, theme, streaming: this.streamingToggle.checked, autoBackup
         });
 
         this.closeSettings();
@@ -948,6 +964,85 @@ class TejaAI {
 
         if (settings.streaming !== undefined) {
             this.streamingToggle.checked = settings.streaming;
+        }
+
+        const { token, repo } = this.githubBackup.getCredentials();
+
+        const githubTokenInput = document.getElementById('githubTokenInput');
+        const githubRepoInput = document.getElementById('githubRepoInput');
+        if (githubTokenInput) githubTokenInput.value = token;
+        if (githubRepoInput) githubRepoInput.value = repo;
+        const autoBackupToggle = document.getElementById('autoBackupToggle');
+        if (autoBackupToggle) {
+            this.autoBackupEnabled = settings.autoBackup || false;
+            autoBackupToggle.checked = this.autoBackupEnabled;
+        }
+    }
+
+    async testGithubConnection() {
+        const token = document.getElementById('githubTokenInput')?.value.trim();
+        const repo = document.getElementById('githubRepoInput')?.value.trim();
+        if (!token || !repo) return showToast('Enter token and repo first.', 'error');
+        this.githubBackup.setCredentials(token, repo);
+        try {
+            const result = await this.githubBackup.testConnection();
+            showToast(`Connected to ${result.name}`, 'success');
+        } catch (e) {
+            showToast(`Connection failed: ${e.message}`, 'error');
+        }
+    }
+
+    async backupNow() {
+        if (!this.githubBackup.isConfigured()) return showToast('Configure GitHub backup in settings first.', 'error');
+        try {
+            await this.githubBackup.backup(this.conversations.getAllConversations());
+            showToast('Backup successful!', 'success');
+        } catch (e) {
+            showToast(`Backup failed: ${e.message}`, 'error');
+        }
+    }
+
+    async openBackupModal() {
+        const modal = document.getElementById('backupModal');
+        const listEl = document.getElementById('backupList');
+        if (!modal || !listEl) return;
+        modal.classList.add('active');
+        if (!this.githubBackup.isConfigured()) {
+            listEl.innerHTML = '<p style="color:var(--text-secondary)">Configure GitHub backup in settings first.</p>';
+            return;
+        }
+        listEl.innerHTML = '<p style="color:var(--text-secondary)">Loading…</p>';
+        try {
+            const backups = await this.githubBackup.listBackups();
+            if (!backups.length) {
+                listEl.innerHTML = '<p style="color:var(--text-secondary)">No backups found.</p>';
+                return;
+            }
+            listEl.innerHTML = backups.map(b => `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-color)">
+                    <span style="font-size:14px">${b.name.replace('backup-', '').replace('.json', '')}</span>
+                    <button class="api-key-save-btn" onclick="app.restoreBackup('${b.path}')">Restore</button>
+                </div>
+            `).join('');
+        } catch (e) {
+            listEl.innerHTML = `<p style="color:#e05c5c">Error: ${e.message}</p>`;
+        }
+    }
+
+    closeBackupModal() {
+        document.getElementById('backupModal')?.classList.remove('active');
+    }
+
+    async restoreBackup(filePath) {
+        if (!confirm('Restore this backup? Current chats will be replaced.')) return;
+        try {
+            const conversations = await this.githubBackup.restore(filePath);
+            localStorage.setItem(CONFIG.STORAGE_KEYS.CONVERSATIONS, JSON.stringify(conversations));
+            this.closeBackupModal();
+            showToast('Backup restored! Reloading…', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } catch (e) {
+            showToast(`Restore failed: ${e.message}`, 'error');
         }
     }
 }

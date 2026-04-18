@@ -455,12 +455,51 @@
                     </label>
                 </div>
 
+                <div class="setting-group">
+                    <label>GitHub Backup</label>
+                    <div class="api-keys-section">
+                        <div class="api-key-row">
+                            <span class="api-key-provider-label">Token</span>
+                            <input type="password" id="githubTokenInput" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+                        </div>
+                        <small>Personal access token with <strong>repo</strong> scope</small>
+                        <div class="api-key-row" style="margin-top:10px">
+                            <span class="api-key-provider-label">Repo</span>
+                            <input type="text" id="githubRepoInput" placeholder="username/teja-ai-backups" autocomplete="off">
+                        </div>
+                        <small>e.g. <strong>yourusername/teja-ai-backups</strong></small>
+                        <div style="display:flex;gap:8px;margin-top:10px">
+                            <button class="api-key-save-btn" id="testGithubBtn">Test Connection</button>
+                            <button class="api-key-save-btn" id="backupNowBtn">Backup Now</button>
+                        </div>
+                        <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;font-weight:normal">
+                            <input type="checkbox" id="autoBackupToggle">
+                            Auto-backup after each message
+                        </label>
+                        <button class="api-key-save-btn" id="viewBackupsBtn" style="margin-top:8px;width:100%">View &amp; Restore Backups</button>
+                    </div>
+                </div>
+
                 <button class="save-btn" id="saveSettingsBtn">Save Settings</button>
             </div>
         </div>
     </div>
 
+    <!-- Backup Restore Modal -->
+    <div class="modal" id="backupModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Backups</h2>
+                <button class="close-btn" id="closeBackupBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="backupList"><p style="color:var(--text-secondary)">Loading backups…</p></div>
+            </div>
+        </div>
+    </div>
+
     <script src="config.js"></script>
+    <script src="github-backup.js"></script>
     <script src="api.js"></script>
     <script src="app.js"></script>
     <script src="firebase-config.js"></script>
