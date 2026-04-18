@@ -5,7 +5,9 @@
       "Bash(where python3 *)",
       "Read(//c/c/Users/tejaa/Downloads/**)",
       "Bash(gh auth *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
