@@ -502,10 +502,27 @@ class TejaAI {
         const chat = this.conversations.getCurrentChat();
 
         if (chat.messages.length === 0) {
+            const savedName = window._tejaUserName || '';
+            const hour = new Date().getHours();
+            const timeGreet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+            const greeting = savedName ? `${timeGreet}, ${savedName}!` : 'Hello!';
             this.messagesContainer.innerHTML = `
                 <div class="welcome-screen" id="welcomeScreen">
-                    <div class="welcome-icon">✳</div>
-                    <h1>teja returns!</h1>
+                    <div class="welcome-logo-wrap">
+                        <svg width="130" height="110" viewBox="0 0 130 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs><path id="tejaArc2" d="M12,80 A58,58 0 0,1 118,80"/></defs>
+                            <text font-family="'Courier New',monospace" font-size="12" letter-spacing="4" fill="currentColor" font-weight="700">
+                                <textPath href="#tejaArc2" startOffset="50%" text-anchor="middle">TEJA  AI</textPath>
+                            </text>
+                            <line x1="32" y1="64" x2="18" y2="78" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                            <line x1="18" y1="78" x2="32" y2="92" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                            <line x1="54" y1="94" x2="76" y2="62" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                            <line x1="98" y1="64" x2="112" y2="78" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                            <line x1="112" y1="78" x2="98" y2="92" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h1 id="welcomeGreeting">${greeting}</h1>
+                    <p class="welcome-sub">How can I help you today?</p>
                 </div>
             `;
             this.welcomeScreen = document.getElementById('welcomeScreen');

@@ -445,6 +445,7 @@
                     return;
                 }
                 const name = user.displayName || user.email.split('@')[0];
+                window._tejaUserName = name;
                 document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
                 document.getElementById('userName').textContent = name;
 
