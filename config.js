@@ -9,12 +9,19 @@ const CONFIG = {
     SITE_NAME: 'Teja AI',
 
     // Default settings
-    DEFAULT_MODEL: 'anthropic/claude-3.5-haiku',
+    DEFAULT_MODEL: 'auto',
     DEFAULT_THEME: 'dark',
     ENABLE_STREAMING: true,
 
-    // Available models — only free/working models on OpenRouter
+    // Available models
     MODELS: {
+    'auto': {
+        name: 'Auto (Smart Select)',
+        provider: 'Teja AI',
+        contextWindow: 0,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    // --- Paid ---
     'anthropic/claude-3.5-haiku': {
         name: 'Claude 3.5 Haiku',
         provider: 'Anthropic',
@@ -44,6 +51,151 @@ const CONFIG = {
         provider: 'Meta',
         contextWindow: 131072,
         pricing: { prompt: 0.0004, completion: 0.0004 }
+    },
+    // --- Free ---
+    'meta-llama/llama-3.3-70b-instruct:free': {
+        name: 'Llama 3.3 70B (Free)',
+        provider: 'Meta',
+        contextWindow: 131072,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'meta-llama/llama-3.2-3b-instruct:free': {
+        name: 'Llama 3.2 3B (Free)',
+        provider: 'Meta',
+        contextWindow: 131072,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'qwen/qwen3-coder:free': {
+        name: 'Qwen3 Coder (Free)',
+        provider: 'Qwen',
+        contextWindow: 32768,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'qwen/qwen3-next-80b-a3b-instruct:free': {
+        name: 'Qwen3 80B (Free)',
+        provider: 'Qwen',
+        contextWindow: 32768,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'google/gemma-3-27b-it:free': {
+        name: 'Gemma 3 27B (Free)',
+        provider: 'Google',
+        contextWindow: 8192,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'google/gemma-3-12b-it:free': {
+        name: 'Gemma 3 12B (Free)',
+        provider: 'Google',
+        contextWindow: 8192,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'google/gemma-3-4b-it:free': {
+        name: 'Gemma 3 4B (Free)',
+        provider: 'Google',
+        contextWindow: 8192,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'google/gemma-3n-e4b-it:free': {
+        name: 'Gemma 3n E4B (Free)',
+        provider: 'Google',
+        contextWindow: 8192,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'google/gemma-3n-e2b-it:free': {
+        name: 'Gemma 3n E2B (Free)',
+        provider: 'Google',
+        contextWindow: 8192,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'google/gemma-4-26b-a4b-it:free': {
+        name: 'Gemma 4 26B (Free)',
+        provider: 'Google',
+        contextWindow: 8192,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'google/gemma-4-31b-it:free': {
+        name: 'Gemma 4 31B (Free)',
+        provider: 'Google',
+        contextWindow: 8192,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'openai/gpt-oss-20b:free': {
+        name: 'GPT OSS 20B (Free)',
+        provider: 'OpenAI',
+        contextWindow: 32768,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'openai/gpt-oss-120b:free': {
+        name: 'GPT OSS 120B (Free)',
+        provider: 'OpenAI',
+        contextWindow: 32768,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'nousresearch/hermes-3-llama-3.1-405b:free': {
+        name: 'Hermes 3 Llama 405B (Free)',
+        provider: 'NousResearch',
+        contextWindow: 131072,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'nvidia/llama-nemotron-embed-vl-1b-v2:free': {
+        name: 'Nemotron Embed 1B (Free)',
+        provider: 'NVIDIA',
+        contextWindow: 8192,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'nvidia/nemotron-nano-12b-v2-vl:free': {
+        name: 'Nemotron Nano 12B (Free)',
+        provider: 'NVIDIA',
+        contextWindow: 32768,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'nvidia/nemotron-nano-9b-v2:free': {
+        name: 'Nemotron Nano 9B (Free)',
+        provider: 'NVIDIA',
+        contextWindow: 32768,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'nvidia/nemotron-3-super-120b-a12b:free': {
+        name: 'Nemotron Super 120B (Free)',
+        provider: 'NVIDIA',
+        contextWindow: 32768,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'liquid/lfm-2.5-1.2b-thinking:free': {
+        name: 'LFM 1.2B Thinking (Free)',
+        provider: 'Liquid',
+        contextWindow: 32768,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'liquid/lfm-2.5-1.2b-instruct:free': {
+        name: 'LFM 1.2B Instruct (Free)',
+        provider: 'Liquid',
+        contextWindow: 32768,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'cognitivecomputations/dolphin-mistral-24b-venice-edition:free': {
+        name: 'Dolphin Mistral 24B (Free)',
+        provider: 'CognitiveComputations',
+        contextWindow: 32768,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'minimax/minimax-m2.5:free': {
+        name: 'MiniMax M2.5 (Free)',
+        provider: 'MiniMax',
+        contextWindow: 40960,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'z-ai/glm-4.5-air:free': {
+        name: 'GLM 4.5 Air (Free)',
+        provider: 'Z-AI',
+        contextWindow: 32768,
+        pricing: { prompt: 0, completion: 0 }
+    },
+    'arcee-ai/trinity-large-preview:free': {
+        name: 'Trinity Large (Free)',
+        provider: 'Arcee AI',
+        contextWindow: 32768,
+        pricing: { prompt: 0, completion: 0 }
     }
 },
     // Local storage keys
@@ -115,3 +267,17 @@ const Theme = {
 
 // Initialize theme
 Theme.apply(Theme.get());
+
+// Auto model selection — picks the best free model based on message content
+function autoSelectModel(message) {
+    const text = message.toLowerCase();
+
+    const isCode = /\b(code|function|bug|error|debug|script|program|class|api|sql|html|css|javascript|python|java|c\+\+|typescript|json|regex|algorithm|array|loop|variable|compile|import|export|async|await)\b/.test(text);
+    const isComplex = text.length > 300 || /\b(explain|analyze|compare|summarize|essay|detailed|research|philosophy|math|calculate|proof|strategy|architecture)\b/.test(text);
+    const isSimple = text.length < 80 && !isCode && !isComplex;
+
+    if (isCode) return 'qwen/qwen3-coder:free';
+    if (isSimple) return 'meta-llama/llama-3.2-3b-instruct:free';
+    if (isComplex) return 'meta-llama/llama-3.3-70b-instruct:free';
+    return 'meta-llama/llama-3.3-70b-instruct:free';
+}

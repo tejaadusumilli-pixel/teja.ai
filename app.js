@@ -97,6 +97,7 @@ class TejaAI {
             const model = this.modelSelectInline.value;
             this.api.setModel(model);
             this.modelSelect.value = model;
+            this.modelSelectInline.dataset.autoMode = (model === 'auto') ? 'true' : 'false';
             this.saveCurrentSettings();
         });
 
@@ -155,6 +156,15 @@ class TejaAI {
 
         const typingId = this.showTypingIndicator();
 
+        // Resolve auto model before sending
+        let resolvedModel = this.api.model;
+        if (resolvedModel === 'auto') {
+            resolvedModel = autoSelectModel(message);
+            this.api.setModel(resolvedModel);
+            // Show which model was auto-selected in the inline selector temporarily
+            if (this.modelSelectInline) this.modelSelectInline.title = `Auto selected: ${CONFIG.MODELS[resolvedModel]?.name || resolvedModel}`;
+        }
+
         try {
             const assistantMsg = this.conversations.addMessage('assistant', '');
             const assistantElement = this.renderMessage('assistant', '', assistantMsg.id);
@@ -168,6 +178,12 @@ class TejaAI {
                     this.conversations.updateLastMessage(fullContent);
                 }
             });
+
+            // Restore auto mode after send if user had auto selected
+            if (this.modelSelectInline?.dataset?.autoMode === 'true') {
+                this.api.setModel('auto');
+                this.modelSelectInline.value = 'auto';
+            }
 
             this.renderChatHistory();
         } catch (error) {
