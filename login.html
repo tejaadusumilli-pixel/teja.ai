@@ -289,14 +289,30 @@
                 Already have an account? <a id="toSignIn">Sign in</a>
             </div>
         </div>
+
+        <!-- API Key view -->
+        <div id="viewApiKey" style="display:none">
+            <h2 class="auth-title">OpenRouter API Key</h2>
+            <p class="auth-subtitle">Enter your key to start chatting. It's saved securely and won't be asked again.</p>
+
+            <div class="auth-field">
+                <label for="openRouterKeyInput">API Key</label>
+                <input type="password" id="openRouterKeyInput" placeholder="sk-or-v1-…" autocomplete="off">
+            </div>
+            <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">
+                Get a free key at <strong style="color:var(--accent-color)">openrouter.ai/keys</strong>
+            </p>
+
+            <button class="auth-btn" id="saveApiKeyBtn">Continue to Teja AI</button>
+        </div>
     </div>
 
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+        import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-        // Load config from firebase-config.js via global
         const cfg = window.FIREBASE_CONFIG;
         if (!cfg || cfg.apiKey === 'YOUR_API_KEY') {
             document.getElementById('authError').textContent = 'Firebase is not configured yet. Open firebase-config.js and fill in your project credentials.';
@@ -305,12 +321,42 @@
 
         const app = initializeApp(cfg || {});
         const auth = getAuth(app);
+        const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
 
-        // Already signed in → go to app
-        onAuthStateChanged(auth, user => {
-            if (user) window.location.href = 'index.html';
+        let currentUser = null;
+        let apiKeyCheckDone = false;
+
+        // Already signed in → check API key in Firestore
+        onAuthStateChanged(auth, async user => {
+            if (user && !apiKeyCheckDone) {
+                apiKeyCheckDone = true;
+                await checkApiKey(user);
+            }
         });
+
+        async function checkApiKey(user) {
+            currentUser = user;
+            try {
+                const snap = await getDoc(doc(db, 'users', user.uid));
+                if (snap.exists() && snap.data().apiKey) {
+                    localStorage.setItem('teja_ai_api_key', snap.data().apiKey);
+                    window.location.href = 'index.html';
+                } else {
+                    showView('viewApiKey');
+                }
+            } catch {
+                // Firestore unavailable — show API key entry as fallback
+                showView('viewApiKey');
+            }
+        }
+
+        function showView(id) {
+            ['viewSignIn','viewSignUp','viewApiKey'].forEach(v => {
+                document.getElementById(v).style.display = v === id ? 'block' : 'none';
+            });
+            document.getElementById('authError').classList.remove('visible');
+        }
 
         const showError = (msg) => {
             const el = document.getElementById('authError');
@@ -325,22 +371,17 @@
                 : btn.dataset.label;
         };
 
-        // Save default labels
-        ['signInBtn','signUpBtn'].forEach(id => {
+        ['signInBtn','signUpBtn','saveApiKeyBtn'].forEach(id => {
             const el = document.getElementById(id);
             el.dataset.label = el.textContent;
         });
 
         // Toggle views
         document.getElementById('toSignUp').addEventListener('click', () => {
-            document.getElementById('viewSignIn').style.display = 'none';
-            document.getElementById('viewSignUp').style.display = 'block';
-            document.getElementById('authError').classList.remove('visible');
+            showView('viewSignUp');
         });
         document.getElementById('toSignIn').addEventListener('click', () => {
-            document.getElementById('viewSignUp').style.display = 'none';
-            document.getElementById('viewSignIn').style.display = 'block';
-            document.getElementById('authError').classList.remove('visible');
+            showView('viewSignIn');
         });
 
         // Sign In
@@ -351,7 +392,9 @@
             if (!email || !password) return showError('Please enter your email and password.');
             setLoading(btn, true);
             try {
-                await signInWithEmailAndPassword(auth, email, password);
+                const cred = await signInWithEmailAndPassword(auth, email, password);
+                apiKeyCheckDone = true;
+                await checkApiKey(cred.user);
             } catch (e) {
                 showError(friendlyError(e.code));
                 setLoading(btn, false);
@@ -370,6 +413,8 @@
             try {
                 const cred = await createUserWithEmailAndPassword(auth, email, password);
                 await updateProfile(cred.user, { displayName: name });
+                apiKeyCheckDone = true;
+                await checkApiKey(cred.user);
             } catch (e) {
                 showError(friendlyError(e.code));
                 setLoading(btn, false);
@@ -379,7 +424,9 @@
         // Google Sign In / Sign Up
         const googleSignIn = async () => {
             try {
-                await signInWithPopup(auth, googleProvider);
+                const cred = await signInWithPopup(auth, googleProvider);
+                apiKeyCheckDone = true;
+                await checkApiKey(cred.user);
             } catch (e) {
                 if (e.code !== 'auth/popup-closed-by-user') showError(friendlyError(e.code));
             }
@@ -387,12 +434,47 @@
         document.getElementById('googleSignInBtn').addEventListener('click', googleSignIn);
         document.getElementById('googleSignUpBtn').addEventListener('click', googleSignIn);
 
+        // Save API Key — with deduplication check
+        document.getElementById('saveApiKeyBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('saveApiKeyBtn');
+            const apiKey = document.getElementById('openRouterKeyInput').value.trim();
+            if (!apiKey) return showError('Please enter your OpenRouter API key.');
+            if (!apiKey.startsWith('sk-or-')) return showError('Invalid key format. OpenRouter keys start with sk-or-');
+            if (!currentUser) return showError('Session expired. Please sign in again.');
+            setLoading(btn, true);
+            try {
+                // Deduplication: check if this key is already registered to a different account
+                const keySnap = await getDoc(doc(db, 'apiKeys', apiKey));
+                if (keySnap.exists() && keySnap.data().uid !== currentUser.uid) {
+                    showError('This API key is already linked to another account.');
+                    setLoading(btn, false);
+                    return;
+                }
+                // Save key under the user's document and in the apiKeys index
+                await setDoc(doc(db, 'users', currentUser.uid), {
+                    apiKey,
+                    email: currentUser.email,
+                    updatedAt: Date.now()
+                }, { merge: true });
+                await setDoc(doc(db, 'apiKeys', apiKey), { uid: currentUser.uid });
+                localStorage.setItem('teja_ai_api_key', apiKey);
+                window.location.href = 'index.html';
+            } catch (e) {
+                showError('Failed to save API key. Please try again.');
+                setLoading(btn, false);
+            }
+        });
+
         // Enter key support
         document.addEventListener('keydown', e => {
             if (e.key !== 'Enter') return;
-            const signInVisible = document.getElementById('viewSignIn').style.display !== 'none';
-            if (signInVisible) document.getElementById('signInBtn').click();
-            else document.getElementById('signUpBtn').click();
+            if (document.getElementById('viewSignIn').style.display !== 'none') {
+                document.getElementById('signInBtn').click();
+            } else if (document.getElementById('viewSignUp').style.display !== 'none') {
+                document.getElementById('signUpBtn').click();
+            } else if (document.getElementById('viewApiKey').style.display !== 'none') {
+                document.getElementById('saveApiKeyBtn').click();
+            }
         });
 
         function friendlyError(code) {
