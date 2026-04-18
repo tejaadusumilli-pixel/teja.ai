@@ -242,13 +242,19 @@ class TejaAI {
 
             const messages = this.conversations.getApiMessages();
 
-            await this.api.sendMessage(messages, {
+            const result = await this.api.sendMessage(messages, {
                 stream: this.streamingToggle.checked,
                 onChunk: (chunk, fullContent) => {
                     this.updateMessageContent(assistantElement, fullContent);
                     this.conversations.updateLastMessage(fullContent);
                 }
             });
+
+            // For non-streaming responses, update UI from return value
+            if (!this.streamingToggle.checked && result?.content) {
+                this.updateMessageContent(assistantElement, result.content);
+                this.conversations.updateLastMessage(result.content);
+            }
 
             // Restore auto mode after send if user had auto selected
             if (this.modelSelectInline?.dataset?.autoMode === 'true') {

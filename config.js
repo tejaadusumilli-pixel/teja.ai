@@ -206,14 +206,12 @@ const CONFIG = {
         pricing: { prompt: 0, completion: 0 }
     }
 },
-    // Gemini models
+    // Gemini models — only genuinely free tier models
     GEMINI_MODELS: {
         'auto': { name: 'Auto (Smart Select)', provider: 'Teja AI', contextWindow: 0, pricing: { prompt: 0, completion: 0 } },
-        'gemini-2.0-flash': { name: 'Gemini 2.0 Flash', provider: 'Google', contextWindow: 1048576, pricing: { prompt: 0, completion: 0 } },
-        'gemini-1.5-flash': { name: 'Gemini 1.5 Flash', provider: 'Google', contextWindow: 1048576, pricing: { prompt: 0, completion: 0 } },
-        'gemini-1.5-flash-8b': { name: 'Gemini 1.5 Flash 8B', provider: 'Google', contextWindow: 1048576, pricing: { prompt: 0, completion: 0 } },
-        'gemini-1.5-pro': { name: 'Gemini 1.5 Pro', provider: 'Google', contextWindow: 2097152, pricing: { prompt: 0, completion: 0 } },
-        'gemini-1.0-pro': { name: 'Gemini 1.0 Pro', provider: 'Google', contextWindow: 32768, pricing: { prompt: 0, completion: 0 } }
+        'gemini-1.5-flash': { name: 'Gemini 1.5 Flash (Free)', provider: 'Google', contextWindow: 1048576, pricing: { prompt: 0, completion: 0 } },
+        'gemini-1.5-flash-8b': { name: 'Gemini 1.5 Flash 8B (Free)', provider: 'Google', contextWindow: 1048576, pricing: { prompt: 0, completion: 0 } },
+        'gemini-1.5-pro': { name: 'Gemini 1.5 Pro (Free, limited)', provider: 'Google', contextWindow: 2097152, pricing: { prompt: 0, completion: 0 } }
     },
 
     // Local storage keys
@@ -297,7 +295,7 @@ function autoSelectModel(message, provider = 'openrouter') {
 
     if (provider === 'gemini') {
         if (isComplex) return 'gemini-1.5-pro';
-        return 'gemini-2.0-flash';
+        return 'gemini-1.5-flash';
     }
     if (isCode) return 'qwen/qwen3-coder:free';
     if (isSimple) return 'meta-llama/llama-3.2-3b-instruct:free';
