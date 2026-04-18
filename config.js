@@ -9,35 +9,17 @@ const CONFIG = {
     SITE_NAME: 'Teja AI',
 
     // Default settings
-    DEFAULT_MODEL: 'anthropic/claude-3.5-sonnet',
+    DEFAULT_MODEL: 'anthropic/claude-3.5-haiku',
     DEFAULT_THEME: 'dark',
     ENABLE_STREAMING: true,
 
-    // Available models (current OpenRouter IDs as of 2025)
+    // Available models — only free/working models on OpenRouter
     MODELS: {
-    'anthropic/claude-3.5-sonnet': {
-        name: 'Claude 3.5 Sonnet',
-        provider: 'Anthropic',
-        contextWindow: 200000,
-        pricing: { prompt: 0.003, completion: 0.015 }
-    },
     'anthropic/claude-3.5-haiku': {
         name: 'Claude 3.5 Haiku',
         provider: 'Anthropic',
         contextWindow: 200000,
         pricing: { prompt: 0.0008, completion: 0.004 }
-    },
-    'anthropic/claude-3-opus': {
-        name: 'Claude 3 Opus',
-        provider: 'Anthropic',
-        contextWindow: 200000,
-        pricing: { prompt: 0.015, completion: 0.075 }
-    },
-    'openai/gpt-4o': {
-        name: 'GPT-4o',
-        provider: 'OpenAI',
-        contextWindow: 128000,
-        pricing: { prompt: 0.0025, completion: 0.01 }
     },
     'openai/gpt-4o-mini': {
         name: 'GPT-4o Mini',
@@ -50,18 +32,6 @@ const CONFIG = {
         provider: 'OpenAI',
         contextWindow: 16000,
         pricing: { prompt: 0.0005, completion: 0.0015 }
-    },
-    'google/gemini-flash-1.5': {
-        name: 'Gemini Flash 1.5',
-        provider: 'Google',
-        contextWindow: 1000000,
-        pricing: { prompt: 0.000075, completion: 0.0003 }
-    },
-    'google/gemini-pro-1.5': {
-        name: 'Gemini Pro 1.5',
-        provider: 'Google',
-        contextWindow: 2000000,
-        pricing: { prompt: 0.00125, completion: 0.005 }
     },
     'meta-llama/llama-3.1-8b-instruct': {
         name: 'Llama 3.1 8B',
