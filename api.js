@@ -146,7 +146,7 @@ class OpenRouterAPI {
 class GeminiAPI {
     constructor() {
         this.apiKey = Storage.get(CONFIG.STORAGE_KEYS.GEMINI_KEY);
-        this.model = 'gemini-1.5-flash-latest';
+        this.model = 'gemini-1.5-flash';
     }
 
     setApiKey(key) {
@@ -172,7 +172,7 @@ class GeminiAPI {
         const body = { contents, generationConfig: { temperature, maxOutputTokens: maxTokens } };
         if (systemInstruction) body.systemInstruction = systemInstruction;
 
-        const model = this.model === 'auto' ? 'gemini-1.5-flash-latest' : this.model;
+        const model = this.model === 'auto' ? 'gemini-1.5-flash' : this.model;
         const action = stream ? 'streamGenerateContent' : 'generateContent';
         const url = `${CONFIG.GEMINI_API_URL}/${model}:${action}?key=${this.apiKey}${stream ? '&alt=sse' : ''}`;
 
