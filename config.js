@@ -4,6 +4,7 @@ const CONFIG = {
     // Provider API URLs
     OPENROUTER_API_URL: 'https://openrouter.ai/api/v1/chat/completions',
     GEMINI_API_URL: 'https://generativelanguage.googleapis.com/v1/models',
+    HUGGINGFACE_API_URL: 'https://api-inference.huggingface.co/v1/chat/completions',
 
     // Your site information
     SITE_URL: 'https://teja.ai',
@@ -11,8 +12,9 @@ const CONFIG = {
 
     // Providers
     PROVIDERS: {
-        openrouter: { name: 'OpenRouter', key: 'teja_ai_api_key' },
-        gemini:     { name: 'Google Gemini', key: 'teja_ai_gemini_key' }
+        openrouter:   { name: 'OpenRouter',      key: 'teja_ai_api_key' },
+        gemini:       { name: 'Google Gemini',   key: 'teja_ai_gemini_key' },
+        huggingface:  { name: 'Hugging Face',    key: 'teja_ai_hf_key' }
     },
     DEFAULT_PROVIDER: 'openrouter',
 
@@ -214,10 +216,23 @@ const CONFIG = {
         'gemini-1.5-pro-latest': { name: 'Gemini 1.5 Pro (Free, limited)', provider: 'Google', contextWindow: 2097152, pricing: { prompt: 0, completion: 0 } }
     },
 
+    // Hugging Face free models (OpenAI-compatible chat endpoint)
+    HUGGINGFACE_MODELS: {
+        'auto': { name: 'Auto (Smart Select)', provider: 'Teja AI', contextWindow: 0 },
+        'mistralai/Mistral-7B-Instruct-v0.3': { name: 'Mistral 7B Instruct (Free)', provider: 'Mistral', contextWindow: 32768 },
+        'HuggingFaceH4/zephyr-7b-beta': { name: 'Zephyr 7B Beta (Free)', provider: 'HuggingFace', contextWindow: 32768 },
+        'google/gemma-2-9b-it': { name: 'Gemma 2 9B (Free)', provider: 'Google', contextWindow: 8192 },
+        'microsoft/Phi-3-mini-4k-instruct': { name: 'Phi-3 Mini 4K (Free)', provider: 'Microsoft', contextWindow: 4096 },
+        'Qwen/Qwen2.5-72B-Instruct': { name: 'Qwen 2.5 72B (Free)', provider: 'Qwen', contextWindow: 32768 },
+        'meta-llama/Meta-Llama-3.1-8B-Instruct': { name: 'Llama 3.1 8B (Free)', provider: 'Meta', contextWindow: 131072 },
+        'deepseek-ai/DeepSeek-R1-Distill-Qwen-7B': { name: 'DeepSeek R1 7B (Free)', provider: 'DeepSeek', contextWindow: 32768 }
+    },
+
     // Local storage keys
     STORAGE_KEYS: {
         API_KEY: 'teja_ai_api_key',
         GEMINI_KEY: 'teja_ai_gemini_key',
+        HF_KEY: 'teja_ai_hf_key',
         PROVIDER: 'teja_ai_provider',
         CONVERSATIONS: 'teja_ai_conversations',
         CURRENT_CHAT: 'teja_ai_current_chat',
@@ -296,6 +311,11 @@ function autoSelectModel(message, provider = 'openrouter') {
     if (provider === 'gemini') {
         if (isComplex) return 'gemini-1.5-pro-latest';
         return 'gemini-1.5-flash-latest';
+    }
+    if (provider === 'huggingface') {
+        if (isCode) return 'Qwen/Qwen2.5-72B-Instruct';
+        if (isComplex) return 'Qwen/Qwen2.5-72B-Instruct';
+        return 'mistralai/Mistral-7B-Instruct-v0.3';
     }
     if (isCode) return 'qwen/qwen3-coder:free';
     if (isSimple) return 'meta-llama/llama-3.2-3b-instruct:free';

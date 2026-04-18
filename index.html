@@ -146,6 +146,23 @@
 
         </aside>
 
+        <!-- Hugging Face API Key Modal -->
+        <div class="apikey-modal-overlay" id="hfKeyOverlay">
+            <div class="apikey-modal-card">
+                <div class="apikey-modal-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M8 12h8M12 8v8"/></svg>
+                </div>
+                <h3 class="apikey-modal-title">Hugging Face Token</h3>
+                <p class="apikey-modal-sub">Get a free token at <strong>huggingface.co/settings/tokens</strong></p>
+                <input type="password" id="hfKeyInput" class="apikey-modal-input" placeholder="hf_…" autocomplete="off">
+                <div id="hfKeyError" class="apikey-modal-error"></div>
+                <div class="apikey-modal-actions">
+                    <button class="apikey-modal-cancel" id="hfKeyCancel">Cancel</button>
+                    <button class="apikey-modal-save" id="hfKeySave">Save & Switch</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Gemini API Key Modal -->
         <div class="apikey-modal-overlay" id="geminiKeyOverlay">
             <div class="apikey-modal-card">
@@ -231,6 +248,7 @@
                         <select id="providerSelect" title="Select provider">
                             <option value="openrouter">OpenRouter</option>
                             <option value="gemini">Gemini</option>
+                            <option value="huggingface">Hugging Face</option>
                         </select>
                         <select id="modelSelectInline" title="Select model"></select>
                         <button class="send-btn" id="sendBtn" disabled>
@@ -431,6 +449,12 @@
                             <button class="api-key-save-btn" id="saveGeminiKeyBtn">Save</button>
                         </div>
                         <small>Get a free key at <strong>aistudio.google.com</strong></small>
+                        <div class="api-key-row" style="margin-top:10px">
+                            <span class="api-key-provider-label">Hugging Face</span>
+                            <input type="password" id="hfApiKeyInput" placeholder="hf_…" autocomplete="off">
+                            <button class="api-key-save-btn" id="saveHFKeyBtn">Save</button>
+                        </div>
+                        <small>Get a free token at <strong>huggingface.co/settings/tokens</strong></small>
                     </div>
                 </div>
 
@@ -512,6 +536,9 @@
                 window._tejaFirestoreSetGeminiKey = async (geminiKey) => {
                     try { await setDoc(doc(db, 'users', user.uid), { geminiApiKey: geminiKey }, { merge: true }); } catch {}
                 };
+                window._tejaFirestoreSetHFKey = async (hfKey) => {
+                    try { await setDoc(doc(db, 'users', user.uid), { hfApiKey: hfKey }, { merge: true }); } catch {}
+                };
 
                 try {
                     const snap = await getDoc(doc(db, 'users', user.uid));
@@ -525,6 +552,12 @@
                             const gKey = snap.data().geminiApiKey;
                             localStorage.setItem('teja_ai_gemini_key', gKey);
                             if (window.app && window.app.geminiAPI) window.app.geminiAPI.setApiKey(gKey);
+                        }
+                        // Load Hugging Face key if saved
+                        if (snap.data().hfApiKey) {
+                            const hKey = snap.data().hfApiKey;
+                            localStorage.setItem('teja_ai_hf_key', hKey);
+                            if (window.app && window.app.huggingfaceAPI) window.app.huggingfaceAPI.setApiKey(hKey);
                         }
                     } else {
                         window.location.href = 'login.html';

@@ -142,6 +142,59 @@ class OpenRouterAPI {
     }
 }
 
+// Hugging Face API Integration (OpenAI-compatible)
+class HuggingFaceAPI {
+    constructor() {
+        this.apiKey = Storage.get(CONFIG.STORAGE_KEYS.HF_KEY);
+        this.model = 'mistralai/Mistral-7B-Instruct-v0.3';
+    }
+
+    setApiKey(key) { this.apiKey = key; Storage.set(CONFIG.STORAGE_KEYS.HF_KEY, key); }
+    getApiKey() { return this.apiKey; }
+    setModel(model) { this.model = model; }
+
+    async sendMessage(messages, options = {}) {
+        if (!this.apiKey) throw new Error('Hugging Face token not set. Please add it in settings.');
+        const { stream = false, temperature = 0.7, maxTokens = 2048, onChunk = null } = options;
+        const model = (this.model === 'auto') ? 'mistralai/Mistral-7B-Instruct-v0.3' : this.model;
+
+        const body = { model, messages, temperature, max_tokens: maxTokens, stream };
+        const response = await fetch(CONFIG.HUGGINGFACE_API_URL, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${this.apiKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error || `Hugging Face error ${response.status}`);
+        }
+
+        if (stream && onChunk) {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let full = '';
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const lines = decoder.decode(value, { stream: true }).split('\n');
+                for (const line of lines) {
+                    if (!line.startsWith('data: ') || line.includes('[DONE]')) continue;
+                    try {
+                        const data = JSON.parse(line.slice(6));
+                        const text = data.choices?.[0]?.delta?.content || '';
+                        if (text) { full += text; onChunk(text, full); }
+                    } catch {}
+                }
+            }
+            return { content: full, model };
+        } else {
+            const data = await response.json();
+            return { content: data.choices?.[0]?.message?.content || '', model };
+        }
+    }
+}
+
 // Google Gemini API Integration
 class GeminiAPI {
     constructor() {
