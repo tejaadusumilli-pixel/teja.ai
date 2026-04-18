@@ -585,11 +585,24 @@ body {
     margin-bottom: 12px;
 }
 
+.welcome-logo-wrap {
+    color: var(--accent-color);
+    margin-bottom: 16px;
+    opacity: 0.9;
+}
+
 .welcome-screen h1 {
-    font-size: 36px;
-    font-weight: 600;
+    font-size: 32px;
+    font-weight: 700;
     color: var(--text-primary);
     letter-spacing: -0.5px;
+    margin-bottom: 6px;
+}
+
+.welcome-sub {
+    font-size: 15px;
+    color: var(--text-secondary);
+    margin-top: 4px;
 }
 
 /* ── Messages ─────────────────────────────────── */
