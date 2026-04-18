@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teja AI — Sign in</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #212121;
+            --bg-tertiary: #2a2a2a;
+            --bg-hover: #303030;
+            --text-primary: #e8e8e8;
+            --text-secondary: #999;
+            --border-color: rgba(255,255,255,0.08);
+            --accent-color: #d4895a;
+            --error-color: #e05c5c;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 400px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 40px 36px;
+        }
+
+        .auth-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 28px;
+        }
+
+        .auth-logo-icon {
+            font-size: 28px;
+            margin-right: 10px;
+        }
+
+        .auth-logo-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+
+        .auth-title {
+            font-size: 20px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .auth-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .auth-field {
+            margin-bottom: 14px;
+        }
+
+        .auth-field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .auth-field input {
+            width: 100%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 11px 14px;
+            color: var(--text-primary);
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .auth-field input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .auth-field input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent-color);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: opacity 0.15s;
+        }
+
+        .auth-btn:hover { opacity: 0.88; }
+        .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .google-btn {
+            width: 100%;
+            padding: 11px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .google-btn:hover {
+            background: var(--bg-hover);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .google-btn svg { flex-shrink: 0; }
+
+        .auth-toggle {
+            text-align: center;
+            margin-top: 22px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .auth-toggle a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .auth-toggle a:hover { text-decoration: underline; }
+
+        .auth-error {
+            background: rgba(224, 92, 92, 0.12);
+            border: 1px solid rgba(224, 92, 92, 0.3);
+            color: var(--error-color);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .auth-error.visible { display: block; }
+
+        .auth-loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <div class="auth-logo">
+            <span class="auth-logo-icon">✳</span>
+            <span class="auth-logo-name">Teja AI</span>
+        </div>
+
+        <div id="authError" class="auth-error"></div>
+
+        <!-- Sign In view -->
+        <div id="viewSignIn">
+            <h2 class="auth-title">Welcome back</h2>
+            <p class="auth-subtitle">Sign in to your Teja AI account</p>
+
+            <div class="auth-field">
+                <label for="signInEmail">Email</label>
+                <input type="email" id="signInEmail" placeholder="you@example.com" autocomplete="email">
+            </div>
+            <div class="auth-field">
+                <label for="signInPassword">Password</label>
+                <input type="password" id="signInPassword" placeholder="••••••••" autocomplete="current-password">
+            </div>
+
+            <button class="auth-btn" id="signInBtn">Sign in</button>
+
+            <div class="auth-divider">or</div>
+
+            <button class="google-btn" id="googleSignInBtn">
+                <svg width="18" height="18" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                    <path fill="none" d="M0 0h48v48H0z"/>
+                </svg>
+                Continue with Google
+            </button>
+
+            <div class="auth-toggle">
+                Don't have an account? <a id="toSignUp">Sign up</a>
+            </div>
+        </div>
+
+        <!-- Sign Up view -->
+        <div id="viewSignUp" style="display:none">
+            <h2 class="auth-title">Create account</h2>
+            <p class="auth-subtitle">Start chatting with Teja AI</p>
+
+            <div class="auth-field">
+                <label for="signUpName">Name</label>
+                <input type="text" id="signUpName" placeholder="Your name" autocomplete="name">
+            </div>
+            <div class="auth-field">
+                <label for="signUpEmail">Email</label>
+                <input type="email" id="signUpEmail" placeholder="you@example.com" autocomplete="email">
+            </div>
+            <div class="auth-field">
+                <label for="signUpPassword">Password</label>
+                <input type="password" id="signUpPassword" placeholder="Min 6 characters" autocomplete="new-password">
+            </div>
+
+            <button class="auth-btn" id="signUpBtn">Create account</button>
+
+            <div class="auth-divider">or</div>
+
+            <button class="google-btn" id="googleSignUpBtn">
+                <svg width="18" height="18" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                    <path fill="none" d="M0 0h48v48H0z"/>
+                </svg>
+                Continue with Google
+            </button>
+
+            <div class="auth-toggle">
+                Already have an account? <a id="toSignIn">Sign in</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+        // Load config from firebase-config.js via global
+        const cfg = window.FIREBASE_CONFIG;
+        if (!cfg || cfg.apiKey === 'YOUR_API_KEY') {
+            document.getElementById('authError').textContent = 'Firebase is not configured yet. Open firebase-config.js and fill in your project credentials.';
+            document.getElementById('authError').classList.add('visible');
+        }
+
+        const app = initializeApp(cfg || {});
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        // Already signed in → go to app
+        onAuthStateChanged(auth, user => {
+            if (user) window.location.href = 'index.html';
+        });
+
+        const showError = (msg) => {
+            const el = document.getElementById('authError');
+            el.textContent = msg;
+            el.classList.add('visible');
+        };
+
+        const setLoading = (btn, loading) => {
+            btn.disabled = loading;
+            btn.innerHTML = loading
+                ? `<span class="auth-loading"></span> Please wait…`
+                : btn.dataset.label;
+        };
+
+        // Save default labels
+        ['signInBtn','signUpBtn'].forEach(id => {
+            const el = document.getElementById(id);
+            el.dataset.label = el.textContent;
+        });
+
+        // Toggle views
+        document.getElementById('toSignUp').addEventListener('click', () => {
+            document.getElementById('viewSignIn').style.display = 'none';
+            document.getElementById('viewSignUp').style.display = 'block';
+            document.getElementById('authError').classList.remove('visible');
+        });
+        document.getElementById('toSignIn').addEventListener('click', () => {
+            document.getElementById('viewSignUp').style.display = 'none';
+            document.getElementById('viewSignIn').style.display = 'block';
+            document.getElementById('authError').classList.remove('visible');
+        });
+
+        // Sign In
+        document.getElementById('signInBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('signInBtn');
+            const email = document.getElementById('signInEmail').value.trim();
+            const password = document.getElementById('signInPassword').value;
+            if (!email || !password) return showError('Please enter your email and password.');
+            setLoading(btn, true);
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (e) {
+                showError(friendlyError(e.code));
+                setLoading(btn, false);
+            }
+        });
+
+        // Sign Up
+        document.getElementById('signUpBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('signUpBtn');
+            const name = document.getElementById('signUpName').value.trim();
+            const email = document.getElementById('signUpEmail').value.trim();
+            const password = document.getElementById('signUpPassword').value;
+            if (!name || !email || !password) return showError('Please fill in all fields.');
+            if (password.length < 6) return showError('Password must be at least 6 characters.');
+            setLoading(btn, true);
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, email, password);
+                await updateProfile(cred.user, { displayName: name });
+            } catch (e) {
+                showError(friendlyError(e.code));
+                setLoading(btn, false);
+            }
+        });
+
+        // Google Sign In / Sign Up
+        const googleSignIn = async () => {
+            try {
+                await signInWithPopup(auth, googleProvider);
+            } catch (e) {
+                if (e.code !== 'auth/popup-closed-by-user') showError(friendlyError(e.code));
+            }
+        };
+        document.getElementById('googleSignInBtn').addEventListener('click', googleSignIn);
+        document.getElementById('googleSignUpBtn').addEventListener('click', googleSignIn);
+
+        // Enter key support
+        document.addEventListener('keydown', e => {
+            if (e.key !== 'Enter') return;
+            const signInVisible = document.getElementById('viewSignIn').style.display !== 'none';
+            if (signInVisible) document.getElementById('signInBtn').click();
+            else document.getElementById('signUpBtn').click();
+        });
+
+        function friendlyError(code) {
+            const map = {
+                'auth/user-not-found': 'No account found with this email.',
+                'auth/wrong-password': 'Incorrect password.',
+                'auth/email-already-in-use': 'An account with this email already exists.',
+                'auth/invalid-email': 'Please enter a valid email address.',
+                'auth/weak-password': 'Password must be at least 6 characters.',
+                'auth/too-many-requests': 'Too many attempts. Please try again later.',
+                'auth/network-request-failed': 'Network error. Check your connection.',
+                'auth/invalid-credential': 'Invalid email or password.',
+            };
+            return map[code] || 'Something went wrong. Please try again.';
+        }
+    </script>
+
+    <script src="firebase-config.js"></script>
+</body>
+</html>
